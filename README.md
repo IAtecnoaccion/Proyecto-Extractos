@@ -2,85 +2,84 @@
 
 Aplicación web para consultar y visualizar extractos de sorteos desde el API público de Lote Móvil.
 
-## Características
+## 🚀 Características Implementadas
 
 - **Frontend**: React + Vite + TypeScript
 - **Estilo**: CSS puro, interfaz minimalista y responsive
 - **Funcionalidades**:
-  - Selección de organización y tipo de imputación
-  - Consulta por fecha específica
-  - Visualización de primeros 5 resultados
-  - Exportación completa de datos en formato CSV
-  - Manejo de errores y estados de carga
+  - ✅ Selección de organización y tipo de imputación
+  - ✅ Consulta por fecha específica (formato dd/MM/yyyy)
+  - ✅ Filtros adicionales por Jurisdicción (d_tipo) y Modalidad (d_modal)
+  - ✅ Tabla de resultados con: Posición, Número, Jurisdicción, Modalidad
+  - ✅ Exportación CSV filtrada (solo datos de la tabla visible)
+  - ✅ Manejo de errores y estados de carga
+  - ✅ Llamada al API con Bearer Token incluido
+  - ✅ Soporte para proxy en caso de CORS
 
-## Requisitos
+## 📋 Requisitos
 
 - Node.js 16+ y npm
 
-## Instalación
+## 🛠️ Instalación y Uso
 
-1. Instalar dependencias:
+1. **Clonar el repositorio:**
+```bash
+git clone https://github.com/IAtecnoaccion/Proyecto-Extractos.git
+cd Proyecto-Extractos
+```
+
+2. **Instalar dependencias:**
 ```bash
 npm install
 ```
 
-2. Ejecutar en modo desarrollo:
+3. **Ejecutar en modo desarrollo:**
 ```bash
 npm run dev
 ```
 
-3. Abrir http://localhost:3000 en el navegador
+4. **Abrir en el navegador:**
+- http://localhost:3000 (o el puerto que indique la consola)
 
-## Uso
+## 🎯 Ejemplo de Uso
 
-### Filtros disponibles
-
-**Organizaciones:**
-- 1 - Neuquén
-- 2 - La Rioja
-- 3 - La Pampa
-- 4 - Corrientes
-- 5 - Río Negro
-- 6 - Salta
-- 7 - Santiago del Estero
-- 10 - Jujuy
-- 12 - Tierra del Fuego
-- 14 - Catamarca
-
-**Imputaciones:**
-- 0 - Quiniela / Tómbola
-- 3 - Loto
-- 4 - Quini 6
-- 6 - Pozo Quiniela
-- 7 - Brinco
-- 9 - Loto 5
-- 10 - Lotería
-- 21 - Patagonia Telebingo
-- 25 - Telekino Automatizado
-
-### Ejemplo de uso
-
-1. Seleccionar **Salta (6)** como organización
-2. Seleccionar **Quiniela / Tómbola (0)** como imputación  
-3. Elegir fecha **19/09/2025**
+1. Seleccionar **6 - Salta** como organización
+2. Seleccionar **0 - Quiniela / Tómbola** como imputación  
+3. Elegir fecha **2025-09-19**
 4. Presionar **"Buscar"**
-5. Ver resultados en pantalla
-6. Usar **"Exportar CSV"** para descargar todos los datos
+5. Usar filtros adicionales de Jurisdicción y Modalidad si es necesario
+6. **"Exportar CSV"** para descargar los resultados filtrados
 
-### API
+## 📊 Filtros Disponibles
 
-La aplicación consulta el endpoint:
+### Organizaciones
+- 1 - Neuquén | 2 - La Rioja | 3 - La Pampa | 4 - Corrientes
+- 5 - Río Negro | 6 - Salta | 7 - Santiago del Estero
+- 10 - Jujuy | 12 - Tierra del Fuego | 14 - Catamarca
+
+### Imputaciones
+- 0 - Quiniela / Tómbola | 3 - Loto | 4 - Quini 6
+- 6 - Pozo Quiniela | 7 - Brinco | 9 - Loto 5
+- 10 - Lotería | 21 - Patagonia Telebingo | 25 - Telekino Automatizado
+
+### Filtros Adicionales (Post-búsqueda)
+- **Jurisdicción**: Filtra por d_tipo (ej: "Salteña", "Ciudad B.A.", etc.)
+- **Modalidad**: Filtra por d_modal (ej: "Matutina", "Vespertina", etc.)
+
+## 🔧 API
+
+**Endpoint consultado:**
 ```
 https://lotemovil.tecnoaccion.com.ar/api/public/{codigoOrganizacion}/extracto?imputacion={imputacion}&fechasorteo={dd/MM/yyyy}
 ```
 
-Con el header de autorización requerido incluido automáticamente.
+**Header requerido:** `Authorization: Bearer [token]` (incluido automáticamente)
 
-## Estructura del proyecto
+## 📁 Estructura del Proyecto
 
 ```
 src/
-├── App.tsx          # Componente principal
+├── App.tsx          # Componente principal con formularios y tabla
 ├── App.css          # Estilos de la aplicación
 ├── main.tsx         # Punto de entrada
 ├── index.css        # Estilos globales
@@ -90,27 +89,45 @@ src/
 └── utils.ts         # Utilidades (fechas, CSV)
 ```
 
-## Exportación CSV
+## 📄 Exportación CSV
 
-El archivo CSV generado incluye:
-- Información general del sorteo
-- Modalidades disponibles
-- Números sorteados por modalidad
-- Premios y premios ganadores (si aplica)
+El CSV exportado incluye exactamente lo que se ve en la tabla:
+- **Columnas**: Posicion, Numero, Jurisdiccion, Modalidad, Organizacion, Imputacion, Fecha
+- **Filtros aplicados**: Respeta los filtros de Jurisdicción y Modalidad seleccionados
+- **Formato**: `resultados_{org}_{imp}_{fecha}[_filtros].csv`
 
-Formato: `extracto_{codigoOrg}_{imputacion}_{fecha}.csv`
+## 🔧 Configuración Avanzada
 
-## Compilación para producción
+### Problemas de CORS
+Si hay problemas de CORS, descomentar la configuración de proxy en `vite.config.ts`:
 
+```typescript
+proxy: {
+  '/api': {
+    target: 'https://lotemovil.tecnoaccion.com.ar',
+    changeOrigin: true,
+    rewrite: (path) => path.replace(/^\/api/, '/api')
+  }
+}
+```
+
+### Compilación para Producción
 ```bash
 npm run build
 ```
 
 Los archivos compilados estarán en la carpeta `dist/`.
 
-## Notas técnicas
+## 🚀 Estado del Proyecto
 
-- **CORS**: Por defecto, la app llama directamente al API. Si hay problemas de CORS, descomentar la configuración de proxy en `vite.config.ts`
-- **Token**: El token de autorización está incluido en el código para simplificar el ejemplo
-- **Formato de fecha**: Se convierte automáticamente de formato `YYYY-MM-DD` (input date) a `dd/MM/yyyy` (API)
-- **TypeScript**: Totalmente tipado con interfaces para la respuesta del API
+**✅ Completado** - Listo para usar en producción
+
+**Próximas mejoras posibles:**
+- Paginación para grandes volúmenes de datos
+- Filtros por rango de fechas
+- Gráficos de visualización
+- Historial de búsquedas
+
+---
+
+**Desarrollado con ❤️ usando React + Vite + TypeScript**
