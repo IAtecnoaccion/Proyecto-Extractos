@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExtractoResponse, FormData } from './types';
+import { ExtractoResponse, FormData, ExtractoFilters } from './types';
 import { organizaciones, imputaciones } from './constants';
 import { formatDateForAPI, exportToCSV } from './utils';
 import { fetchExtracto } from './api';
@@ -10,6 +10,9 @@ function App() {
     organizacion: '',
     imputacion: '',
     fecha: '',
+    fechaDesde: '',
+    fechaHasta: '',
+    tipoBusqueda: 'unica',
     d_tipo: '',
     d_modal: '',
   });
@@ -29,9 +32,41 @@ function App() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     
-    if (!formData.organizacion || !formData.imputacion || !formData.fecha) {
-      setError('Por favor complete todos los campos');
+    // Validaciones básicas
+    if (!formData.organizacion || !formData.imputacion) {
+      setError('Por favor complete organización e imputación');
       return;
+    }
+    
+    // Validaciones específicas por tipo de búsqueda
+    if (formData.tipoBusqueda === 'unica') {
+      if (!formData.fecha) {
+        setError('Por favor seleccione una fecha');
+        return;
+      }
+    } else {
+      if (!formData.fechaDesde || !formData.fechaHasta) {
+        setError('Por favor seleccione fecha desde y fecha hasta');
+        return;
+      }
+      
+      // Validar que fecha desde sea menor o igual a fecha hasta
+      const fechaDesde = new Date(formData.fechaDesde);
+      const fechaHasta = new Date(formData.fechaHasta);
+      
+      if (fechaDesde > fechaHasta) {
+        setError('La fecha desde debe ser menor o igual a la fecha hasta');
+        return;
+      }
+      
+      // Validar que el rango no sea mayor a 31 días para evitar demasiadas consultas
+      const diffTime = Math.abs(fechaHasta.getTime() - fechaDesde.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays > 31) {
+        setError('El rango de fechas no puede ser mayor a 31 días');
+        return;
+      }
     }
     
     setLoading(true);
@@ -39,15 +74,34 @@ function App() {
     setExtractoData(null);
     
     try {
-      const fechaFormateada = formatDateForAPI(formData.fecha);
-      console.log('Fecha original:', formData.fecha);
-      console.log('Fecha formateada:', fechaFormateada);
+      let filters: ExtractoFilters;
       
-      const filters = {
-        organizacion: parseInt(formData.organizacion),
-        imputacion: parseInt(formData.imputacion),
-        fecha: fechaFormateada
-      };
+      if (formData.tipoBusqueda === 'unica') {
+        const fechaFormateada = formatDateForAPI(formData.fecha);
+        console.log('Fecha original:', formData.fecha);
+        console.log('Fecha formateada:', fechaFormateada);
+        
+        filters = {
+          organizacion: parseInt(formData.organizacion),
+          imputacion: parseInt(formData.imputacion),
+          fecha: fechaFormateada,
+          tipoBusqueda: 'unica'
+        };
+      } else {
+        const fechaDesdeFormateada = formatDateForAPI(formData.fechaDesde);
+        const fechaHastaFormateada = formatDateForAPI(formData.fechaHasta);
+        
+        console.log('Rango original:', formData.fechaDesde, 'a', formData.fechaHasta);
+        console.log('Rango formateado:', fechaDesdeFormateada, 'a', fechaHastaFormateada);
+        
+        filters = {
+          organizacion: parseInt(formData.organizacion),
+          imputacion: parseInt(formData.imputacion),
+          fechaDesde: fechaDesdeFormateada,
+          fechaHasta: fechaHastaFormateada,
+          tipoBusqueda: 'rango'
+        };
+      }
       
       console.log('Filtros enviados:', filters);
       
@@ -72,18 +126,37 @@ function App() {
   };
   
   const handleExportCSV = () => {
-    if (!extractoData || !formData.organizacion || !formData.imputacion || !formData.fecha) {
+    if (!extractoData || !formData.organizacion || !formData.imputacion) {
       return;
     }
     
-    exportToCSV(
-      extractoData,
-      parseInt(formData.organizacion),
-      parseInt(formData.imputacion),
-      formatDateForAPI(formData.fecha),
-      formData.d_tipo || undefined,
-      formData.d_modal || undefined
-    );
+    if (formData.tipoBusqueda === 'unica') {
+      if (!formData.fecha) return;
+      
+      exportToCSV(
+        extractoData,
+        parseInt(formData.organizacion),
+        parseInt(formData.imputacion),
+        formatDateForAPI(formData.fecha),
+        undefined,
+        undefined,
+        formData.d_tipo || undefined,
+        formData.d_modal || undefined
+      );
+    } else {
+      if (!formData.fechaDesde || !formData.fechaHasta) return;
+      
+      exportToCSV(
+        extractoData,
+        parseInt(formData.organizacion),
+        parseInt(formData.imputacion),
+        undefined,
+        formatDateForAPI(formData.fechaDesde),
+        formatDateForAPI(formData.fechaHasta),
+        formData.d_tipo || undefined,
+        formData.d_modal || undefined
+      );
+    }
   };
   
   const hasData = extractoData && extractoData.numeros && extractoData.numeros.length > 0;
@@ -133,16 +206,57 @@ function App() {
           </div>
           
           <div className="form-group">
-            <label htmlFor="fecha">Fecha:</label>
-            <input
-              type="date"
-              id="fecha"
-              name="fecha"
-              value={formData.fecha}
+            <label htmlFor="tipoBusqueda">Tipo de búsqueda:</label>
+            <select
+              id="tipoBusqueda"
+              name="tipoBusqueda"
+              value={formData.tipoBusqueda}
               onChange={handleInputChange}
               required
-            />
+            >
+              <option value="unica">Fecha única</option>
+              <option value="rango">Rango de fechas</option>
+            </select>
           </div>
+          
+          {formData.tipoBusqueda === 'unica' ? (
+            <div className="form-group">
+              <label htmlFor="fecha">Fecha:</label>
+              <input
+                type="date"
+                id="fecha"
+                name="fecha"
+                value={formData.fecha}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          ) : (
+            <div className="form-group-row">
+              <div className="form-group">
+                <label htmlFor="fechaDesde">Fecha desde:</label>
+                <input
+                  type="date"
+                  id="fechaDesde"
+                  name="fechaDesde"
+                  value={formData.fechaDesde}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="fechaHasta">Fecha hasta:</label>
+                <input
+                  type="date"
+                  id="fechaHasta"
+                  name="fechaHasta"
+                  value={formData.fechaHasta}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+          )}
           
           <div className="form-actions">
             <button type="submit" disabled={loading} className="btn btn-primary">
@@ -237,6 +351,7 @@ function App() {
                           <tr>
                             <th>Posición</th>
                             <th>Número</th>
+                            <th>Fecha</th>
                             <th>Jurisdicción</th>
                             <th>Modalidad</th>
                           </tr>
@@ -246,6 +361,7 @@ function App() {
                             <tr key={index}>
                               <td>{num.n_ubica || num.posicion || index + 1}</td>
                               <td>{num.n_numero || num.numero}</td>
+                              <td>{num.fechaSorteo || '-'}</td>
                               <td>{num.d_tipo || '-'}</td>
                               <td>{num.d_modal || '-'}</td>
                             </tr>

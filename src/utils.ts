@@ -12,6 +12,26 @@ export function formatDateForAPI(dateString: string): string {
 }
 
 /**
+ * Convierte fecha de formato dd/MM/yyyy a YYYY-MM-DD (para input date)
+ */
+export function formatDateFromAPI(dateString: string): string {
+  if (!dateString) return '';
+  
+  const [day, month, year] = dateString.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
+
+/**
+ * Formatea rango de fechas para mostrar
+ */
+export function formatDateRange(fechaDesde: string, fechaHasta: string): string {
+  if (fechaDesde === fechaHasta) {
+    return fechaDesde;
+  }
+  return `${fechaDesde} al ${fechaHasta}`;
+}
+
+/**
  * Obtiene el nombre de la organización por código
  */
 export function getOrganizacionNombre(codigo: number): string {
@@ -34,7 +54,9 @@ export function exportToCSV(
   data: ExtractoResponse,
   codigoOrganizacion: number,
   imputacion: number,
-  fechaSorteo: string,
+  fechaSorteo?: string,
+  fechaDesde?: string,
+  fechaHasta?: string,
   filtroTipo?: string,
   filtroModal?: string
 ): void {
@@ -42,7 +64,7 @@ export function exportToCSV(
   const rows: string[] = [];
   
   // Header del CSV simplificado para la tabla de resultados
-  rows.push('Posicion,Numero,Jurisdiccion,Modalidad,Organizacion,Imputacion,Fecha');
+  rows.push('Posicion,Numero,Fecha,Jurisdiccion,Modalidad,Organizacion,Imputacion');
   
   // Filtrar números según los filtros aplicados
   let numerosFiltrados = data.numeros || [];
@@ -62,7 +84,17 @@ export function exportToCSV(
     const jurisdiccion = item.d_tipo || '';
     const modalidad = item.d_modal || '';
     
-    rows.push(`${posicion},"${numero}","${jurisdiccion}","${modalidad}","${nombreOrganizacion}",${imputacion},"${fechaSorteo}"`);
+    // Usar la fecha específica del número si existe, sino usar los parámetros
+    let fechaMostrar = item.fechaSorteo || '';
+    if (!fechaMostrar) {
+      if (fechaSorteo) {
+        fechaMostrar = fechaSorteo;
+      } else if (fechaDesde && fechaHasta) {
+        fechaMostrar = formatDateRange(fechaDesde, fechaHasta);
+      }
+    }
+    
+    rows.push(`${posicion},"${numero}","${fechaMostrar}","${jurisdiccion}","${modalidad}","${nombreOrganizacion}",${imputacion}`);
   });
   
   // Si no hay datos después del filtro
@@ -77,7 +109,14 @@ export function exportToCSV(
   const url = URL.createObjectURL(blob);
   
   // Nombre del archivo con información de filtros
-  let fileName = `resultados_${codigoOrganizacion}_${imputacion}_${fechaSorteo.replace(/\//g, '-')}`;
+  let fileName = `resultados_${codigoOrganizacion}_${imputacion}`;
+  
+  if (fechaSorteo) {
+    fileName += `_${fechaSorteo.replace(/\//g, '-')}`;
+  } else if (fechaDesde && fechaHasta) {
+    fileName += `_${fechaDesde.replace(/\//g, '-')}_al_${fechaHasta.replace(/\//g, '-')}`;
+  }
+  
   if (filtroTipo) fileName += `_${filtroTipo.replace(/[^a-zA-Z0-9]/g, '')}`;
   if (filtroModal) fileName += `_${filtroModal.replace(/[^a-zA-Z0-9]/g, '')}`;
   fileName += '.csv';
