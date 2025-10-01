@@ -153,7 +153,7 @@ RESPONDE SOLO lo pedido. Sin "recomiendo" ni explicaciones.`;
 
 // Configuración de Vercel para esta función
 export const config = {
-  runtime: 'nodejs18.x',
+  runtime: 'nodejs',
   maxDuration: 30,
   regions: ['cle1']
 };
