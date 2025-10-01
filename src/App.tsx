@@ -3,9 +3,12 @@ import { ExtractoResponse, FormData, ExtractoFilters } from './types';
 import { organizaciones, imputaciones } from './constants';
 import { formatDateForAPI, exportToCSV } from './utils';
 import { fetchExtracto } from './api';
+import { Estadisticas } from './components/Estadisticas';
+import { AnalisisIA } from './components/AnalisisIA';
 import './App.css';
 
 function App() {
+  const [activeTab, setActiveTab] = useState<'busqueda' | 'estadisticas' | 'ia'>('busqueda');
   const [formData, setFormData] = useState<FormData>({
     organizacion: '',
     imputacion: '',
@@ -59,12 +62,12 @@ function App() {
         return;
       }
       
-      // Validar que el rango no sea mayor a 31 días para evitar demasiadas consultas
+      // Validar que el rango no sea mayor a 6 meses para evitar demasiadas consultas
       const diffTime = Math.abs(fechaHasta.getTime() - fechaDesde.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays > 31) {
-        setError('El rango de fechas no puede ser mayor a 31 días');
+      if (diffDays > 180) {
+        setError('El rango de fechas no puede ser mayor a 6 meses (180 días)');
         return;
       }
     }
@@ -165,10 +168,33 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>Extractos de Sorteos</h1>
+        
+        <nav className="app-tabs">
+          <button 
+            className={`tab-button ${activeTab === 'busqueda' ? 'active' : ''}`}
+            onClick={() => setActiveTab('busqueda')}
+          >
+            Búsqueda
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'estadisticas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('estadisticas')}
+          >
+            Estadísticas
+          </button>
+          <button 
+            className={`tab-button ${activeTab === 'ia' ? 'active' : ''}`}
+            onClick={() => setActiveTab('ia')}
+          >
+            🤖 Análisis IA
+          </button>
+        </nav>
       </header>
       
       <main className="app-main">
-        <form onSubmit={handleSubmit} className="filters-form">
+        {activeTab === 'busqueda' ? (
+          <>
+            <form onSubmit={handleSubmit} className="filters-form">
           <div className="form-group">
             <label htmlFor="organizacion">Organización:</label>
             <select
@@ -381,6 +407,20 @@ function App() {
               </div>
             )}
           </div>
+        )}
+          </>
+        ) : activeTab === 'estadisticas' ? (
+          <Estadisticas 
+            data={extractoData}
+            fechaDesde={formData.fechaDesde}
+            fechaHasta={formData.fechaHasta}
+          />
+        ) : (
+          <AnalisisIA
+            data={extractoData}
+            fechaDesde={formData.fechaDesde}
+            fechaHasta={formData.fechaHasta}
+          />
         )}
       </main>
     </div>

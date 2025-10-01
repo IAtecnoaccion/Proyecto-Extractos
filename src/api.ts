@@ -25,23 +25,21 @@ async function fetchExtractoUnico(filters: ExtractoFilters): Promise<ExtractoRes
   // URLs según entorno
   const urlDirect = import.meta.env.PROD 
     ? `/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`
-    : `https://lotemovil.tecnoaccion.com.ar/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`;
-  
-  const urlProxy = `/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`;
+    : `/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`; // Usar proxy en desarrollo
   
   console.log('Fecha enviada al API:', fecha);
   console.log('URL a usar:', urlDirect);
   console.log('Entorno:', import.meta.env.PROD ? 'Producción (Vercel)' : 'Desarrollo');
   
   try {
-    // En producción usar la función serverless, en desarrollo la API directa
+    // En producción usar la función serverless, en desarrollo usar el proxy
     const response = await fetch(urlDirect, {
       method: 'GET',
       headers: import.meta.env.PROD ? {
         // En producción no enviar el token (lo maneja la función serverless)
         'Content-Type': 'application/json',
       } : {
-        // En desarrollo enviar el token
+        // En desarrollo enviar el token (el proxy lo reenvía)
         'Authorization': `Bearer ${BEARER_TOKEN}`,
         'Content-Type': 'application/json',
       },
@@ -65,37 +63,8 @@ async function fetchExtractoUnico(filters: ExtractoFilters): Promise<ExtractoRes
     return data;
     
   } catch (error) {
-    console.log('Error con llamada principal, intentando con proxy...', error);
-    
-    // Fallback: intentar con proxy (solo en desarrollo)
-    if (!import.meta.env.PROD) {
-      const responseProxy = await fetch(urlProxy, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${BEARER_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!responseProxy.ok) {
-        throw new Error(`Error ${responseProxy.status}: ${responseProxy.statusText}`);
-      }
-      
-      const data = await responseProxy.json();
-      console.log('Respuesta exitosa con proxy:', data);
-      
-      // Agregar la fecha consultada a cada número para búsquedas únicas (proxy)
-      if (data.numeros && Array.isArray(data.numeros)) {
-        data.numeros = data.numeros.map((numero: any) => ({
-          ...numero,
-          fechaSorteo: fecha
-        }));
-      }
-      
-      return data;
-    } else {
-      throw error; // En producción, no hay fallback
-    }
+    console.error('Error en fetchExtractoUnico:', error);
+    throw error;
   }
 }
 
