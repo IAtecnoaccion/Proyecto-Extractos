@@ -308,15 +308,23 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
             <div className="tabla-header">
               <span>Número</span>
               <span>Frecuencia</span>
-              <span>Porcentaje</span>
+              <span>Última fecha</span>
             </div>
-            {estadisticasGenerales.todosMasFrecuentes.map((stat, index) => (
-              <div key={stat.numero} className="tabla-row">
-                <span className="numero-destacado">#{index + 1} {stat.numero}</span>
-                <span className="frecuencia-alta">{stat.frecuencia}</span>
-                <span className="porcentaje">{stat.porcentaje.toFixed(2)}%</span>
-              </div>
-            ))}
+            {estadisticasGenerales.todosMasFrecuentes.map((stat, index) => {
+              // Obtener la fecha más reciente
+              const fechaMasReciente = stat.fechas.sort((a, b) => 
+                new Date(b.split('/').reverse().join('-')).getTime() - 
+                new Date(a.split('/').reverse().join('-')).getTime()
+              )[0];
+              
+              return (
+                <div key={stat.numero} className="tabla-row">
+                  <span className="numero-destacado">#{index + 1} {stat.numero}</span>
+                  <span className="frecuencia-alta">{stat.frecuencia}</span>
+                  <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -327,15 +335,23 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
             <div className="tabla-header">
               <span>Número</span>
               <span>Frecuencia</span>
-              <span>Porcentaje</span>
+              <span>Última fecha</span>
             </div>
-            {estadisticasGenerales.todosMenosFreuentes.map((stat, index) => (
-              <div key={stat.numero} className="tabla-row">
-                <span className="numero-raro">#{index + 1} {stat.numero}</span>
-                <span className="frecuencia-baja">{stat.frecuencia}</span>
-                <span className="porcentaje">{stat.porcentaje.toFixed(2)}%</span>
-              </div>
-            ))}
+            {estadisticasGenerales.todosMenosFreuentes.map((stat, index) => {
+              // Obtener la fecha más reciente
+              const fechaMasReciente = stat.fechas.sort((a, b) => 
+                new Date(b.split('/').reverse().join('-')).getTime() - 
+                new Date(a.split('/').reverse().join('-')).getTime()
+              )[0];
+              
+              return (
+                <div key={stat.numero} className="tabla-row">
+                  <span className="numero-raro">#{index + 1} {stat.numero}</span>
+                  <span className="frecuencia-baja">{stat.frecuencia}</span>
+                  <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -358,27 +374,49 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
               <div className="rango-analisis">
                 <div className="pares-frecuentes-section">
                   <h4>🔥 Pares Más Salidores</h4>
-                  <div className="pares-list">
-                    {rango.paresFrecuentes.slice(0, 5).map((stat) => (
-                      <div key={stat.numero} className="par-item">
-                        <span className="par-numero">{stat.numero}</span>
-                        <span className="par-freq">{stat.frecuencia}</span>
-                        <span className="par-pct">{stat.porcentaje.toFixed(1)}%</span>
-                      </div>
-                    ))}
+                  <div className="pares-tabla">
+                    <div className="pares-header">
+                      <span>Par</span>
+                      <span>Frecuencia</span>
+                      <span>Última fecha</span>
+                    </div>
+                    {rango.paresFrecuentes.slice(0, 5).map((stat) => {
+                      const fechaMasReciente = stat.fechas.sort((a, b) => 
+                        new Date(b.split('/').reverse().join('-')).getTime() - 
+                        new Date(a.split('/').reverse().join('-')).getTime()
+                      )[0];
+                      return (
+                        <div key={stat.numero} className="pares-row">
+                          <span className="par-numero-highlight">{stat.numero}</span>
+                          <span className="par-freq">{stat.frecuencia}</span>
+                          <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 <div className="pares-raros-section">
                   <h4>❄️ Pares Más Atrasados</h4>
-                  <div className="pares-list">
-                    {rango.paresRaros.slice(0, 5).map((stat) => (
-                      <div key={stat.numero} className="par-item">
-                        <span className="par-numero">{stat.numero}</span>
-                        <span className="par-freq">{stat.frecuencia}</span>
-                        <span className="par-pct">{stat.porcentaje.toFixed(1)}%</span>
-                      </div>
-                    ))}
+                  <div className="pares-tabla">
+                    <div className="pares-header">
+                      <span>Par</span>
+                      <span>Frecuencia</span>
+                      <span>Última fecha</span>
+                    </div>
+                    {rango.paresRaros.slice(0, 5).map((stat) => {
+                      const fechaMasReciente = stat.fechas.sort((a, b) => 
+                        new Date(b.split('/').reverse().join('-')).getTime() - 
+                        new Date(a.split('/').reverse().join('-')).getTime()
+                      )[0];
+                      return (
+                        <div key={stat.numero} className="pares-row">
+                          <span className="par-numero-highlight">{stat.numero}</span>
+                          <span className="par-freq">{stat.frecuencia}</span>
+                          <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -401,24 +439,50 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
               <div className="posicion-analisis">
                 <div className="frecuentes-section">
                   <h4>🔥 Pares Más Frecuentes</h4>
-                  {posicion.numerosFrecuentes.map((stat) => (
-                    <div key={stat.numero} className="numero-item">
-                      <span className="numero-valor">{stat.numero}</span>
-                      <span className="numero-freq">{stat.frecuencia} veces</span>
-                      <span className="numero-pct">({stat.porcentaje.toFixed(1)}%)</span>
+                  <div className="pares-tabla">
+                    <div className="pares-header">
+                      <span>Par</span>
+                      <span>Frecuencia</span>
+                      <span>Última fecha</span>
                     </div>
-                  ))}
+                    {posicion.numerosFrecuentes.map((stat) => {
+                      const fechaMasReciente = stat.fechas.sort((a, b) => 
+                        new Date(b.split('/').reverse().join('-')).getTime() - 
+                        new Date(a.split('/').reverse().join('-')).getTime()
+                      )[0];
+                      return (
+                        <div key={stat.numero} className="pares-row">
+                          <span className="par-numero-highlight">{stat.numero}</span>
+                          <span className="par-freq">{stat.frecuencia}</span>
+                          <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="raros-section">
                   <h4>❄️ Pares Menos Frecuentes</h4>
-                  {posicion.numerosRaros.map((stat) => (
-                    <div key={stat.numero} className="numero-item">
-                      <span className="numero-valor">{stat.numero}</span>
-                      <span className="numero-freq">{stat.frecuencia} veces</span>
-                      <span className="numero-pct">({stat.porcentaje.toFixed(1)}%)</span>
+                  <div className="pares-tabla">
+                    <div className="pares-header">
+                      <span>Par</span>
+                      <span>Frecuencia</span>
+                      <span>Última fecha</span>
                     </div>
-                  ))}
+                    {posicion.numerosRaros.map((stat) => {
+                      const fechaMasReciente = stat.fechas.sort((a, b) => 
+                        new Date(b.split('/').reverse().join('-')).getTime() - 
+                        new Date(a.split('/').reverse().join('-')).getTime()
+                      )[0];
+                      return (
+                        <div key={stat.numero} className="pares-row">
+                          <span className="par-numero-highlight">{stat.numero}</span>
+                          <span className="par-freq">{stat.frecuencia}</span>
+                          <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>

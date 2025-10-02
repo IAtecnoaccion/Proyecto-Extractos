@@ -62,12 +62,12 @@ function App() {
         return;
       }
       
-      // Validar que el rango no sea mayor a 6 meses para evitar demasiadas consultas
+      // Validar que el rango no sea mayor a 12 meses para evitar demasiadas consultas
       const diffTime = Math.abs(fechaHasta.getTime() - fechaDesde.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays > 180) {
-        setError('El rango de fechas no puede ser mayor a 6 meses (180 días)');
+      if (diffDays > 365) {
+        setError('El rango de fechas no puede ser mayor a 12 meses (365 días)');
         return;
       }
     }

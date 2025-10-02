@@ -164,7 +164,7 @@
 
 .tabla-header {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1.3fr;
   gap: 20px;
   padding: 15px 20px;
   background: rgba(255, 255, 255, 0.1);
@@ -179,7 +179,7 @@
 
 .tabla-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1.3fr;
   gap: 20px;
   padding: 15px 20px;
   background: rgba(255, 255, 255, 0.03);
@@ -431,14 +431,14 @@
 
 .posiciones-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 30px;
 }
 
 .posicion-card {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
   border-radius: 16px;
-  padding: 25px;
+  padding: 30px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
@@ -639,4 +639,85 @@
   .rangos-grid {
     gap: 15px;
   }
+}
+
+/* Estilos para tablas de pares mejoradas */
+.pares-tabla {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.pares-header {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.3fr;
+  gap: 8px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 11px;
+  color: #b0c4ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.pares-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.3fr;
+  gap: 8px;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.pares-row:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(3px);
+}
+
+.par-numero-highlight {
+  font-weight: 700;
+  color: #ff6b9d;
+  font-size: 16px;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(255, 107, 157, 0.4);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 107, 157, 0.1);
+}
+
+.par-freq {
+  color: #e0e6ff;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+}
+
+.par-pct {
+  color: #ffd93d;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+}
+
+.dias-sin-salir {
+  color: #ff8a65;
+  font-weight: 600;
+  text-align: center;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Mantener estilos anteriores para compatibilidad */
+.par-numero {
+  font-weight: 700;
+  color: #4fd1c7;
+  font-size: 16px;
+  text-align: center;
 }

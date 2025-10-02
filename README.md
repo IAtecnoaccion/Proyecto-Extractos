@@ -9,7 +9,7 @@ Aplicación web para consultar y visualizar extractos de sorteos desde el API p�
 - **Funcionalidades**:
   - ✅ Selección de organización y tipo de imputación
   - ✅ **Búsqueda por fecha única** (formato dd/MM/yyyy)
-  - ✅ **Búsqueda por rango de fechas** (desde/hasta con límite de 6 meses)
+  - ✅ **Búsqueda por rango de fechas** (desde/hasta con límite de 12 meses)
   - ✅ Filtros adicionales por Jurisdicción (d_tipo) y Modalidad (d_modal)
   - ✅ Tabla de resultados con: **Posición, Número, Fecha, Jurisdicción, Modalidad**
   - ✅ **Columna de fecha específica** para cada sorteo consultado
@@ -92,7 +92,7 @@ https://lotemovil.tecnoaccion.com.ar/api/public/{codigoOrganizacion}/extracto?im
 **Nuevas funcionalidades de consulta:**
 - **Fecha única**: Una sola consulta al endpoint
 - **Rango de fechas**: Múltiples consultas paralelas (una por cada fecha del rango)
-- **Límite de rango**: Máximo 6 meses para evitar sobrecarga
+- **Límite de rango**: Máximo 12 meses para evitar sobrecarga
 - **Tolerancia a errores**: Si una fecha falla, las demás continúan
 - **Combinación inteligente**: Resultados de todas las fechas se unen automáticamente
 
@@ -147,7 +147,7 @@ Los archivos compilados estarán en la carpeta `dist/`.
 **✅ Completado** - Listo para usar en producción
 
 **🆕 Nuevas funcionalidades v2.0:**
-- ✅ Búsqueda por rango de fechas (hasta 6 meses)
+- ✅ Búsqueda por rango de fechas (hasta 12 meses)
 - ✅ Columna de fecha específica en tabla y CSV
 - ✅ Consultas paralelas optimizadas
 - ✅ Validaciones mejoradas de formulario
