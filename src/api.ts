@@ -1,5 +1,7 @@
 import { ExtractoResponse, ExtractoFilters } from './types';
-import { BEARER_TOKEN } from './constants';
+
+// Token temporal para desarrollo local - en producción se usa el del backend
+const DEV_TOKEN = 'pLvSbEk6k3EXgG7H3L5wwSMgJueXt4csM5kM6JyhOM2mYG3LkJGdzTewK7CyXiDr';
 
 /**
  * Realiza la consulta al API de extractos
@@ -22,37 +24,72 @@ async function fetchExtractoUnico(filters: ExtractoFilters): Promise<ExtractoRes
     throw new Error('Fecha es requerida para búsqueda única');
   }
   
-  // URLs según entorno
-  const urlDirect = import.meta.env.PROD 
-    ? `/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`
-    : `/api/public/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`; // Usar proxy en desarrollo
-  
   console.log('Fecha enviada al API:', fecha);
-  console.log('URL a usar:', urlDirect);
-  console.log('Entorno:', import.meta.env.PROD ? 'Producción (Vercel)' : 'Desarrollo');
+  console.log('Entorno:', import.meta.env.MODE);
   
   try {
-    // En producción usar la función serverless, en desarrollo usar el proxy
-    const response = await fetch(urlDirect, {
-      method: 'GET',
-      headers: import.meta.env.PROD ? {
-        // En producción no enviar el token (lo maneja la función serverless)
-        'Content-Type': 'application/json',
-      } : {
-        // En desarrollo enviar el token (el proxy lo reenvía)
-        'Authorization': `Bearer ${BEARER_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    let response;
+    
+    // En producción usar el proxy serverless, en desarrollo llamar directamente
+    if (import.meta.env.PROD) {
+      // PRODUCCIÓN: Usar proxy serverless (token está en el backend)
+      const urlProxy = `/api/extracto?organizacion=${organizacion}&imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`;
+      console.log('URL proxy (producción):', urlProxy);
+      
+      response = await fetch(urlProxy, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    } else {
+      // DESARROLLO: Usar proxy de Vite para evitar CORS
+      const urlDirect = `/api-lotemovil/${organizacion}/extracto?imputacion=${imputacion}&fechasorteo=${encodeURIComponent(fecha)}`;
+      console.log('URL proxy Vite (desarrollo):', urlDirect);
+      
+      response = await fetch(urlDirect, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${DEV_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    }
     
     if (!response.ok) {
+      // Si es 429 (rate limit), mostrar mensaje específico
+      if (response.status === 429) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Límite de búsquedas excedido. Intenta más tarde.');
+      }
+      
+      // Si es 500, probablemente no hay datos
+      if (response.status === 500) {
+        console.log('⊘ No hay datos para esta fecha');
+        return {
+          numeros: [],
+          modalidades: [],
+          datosgenerales: [],
+          premios: [],
+          premiosganadores: []
+        };
+      }
+      
       throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
     
     const data = await response.json();
-    console.log('Respuesta exitosa:', data);
     
-    // Agregar la fecha consultada a cada número para búsquedas únicas
+    // Log si viene del caché (solo en producción)
+    if (data._cached) {
+      console.log(`✓ Datos desde caché (${data._cacheAge} min de antigüedad)`);
+    } else if (import.meta.env.PROD) {
+      console.log('✓ Datos frescos desde API');
+    } else {
+      console.log('✓ Datos desde API (desarrollo directo)');
+    }
+    
+    // Agregar la fecha consultada a cada número
     if (data.numeros && Array.isArray(data.numeros)) {
       data.numeros = data.numeros.map((numero: any) => ({
         ...numero,
