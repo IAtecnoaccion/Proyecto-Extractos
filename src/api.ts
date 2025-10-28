@@ -70,6 +70,7 @@ async function fetchExtractoUnico(filters: ExtractoFilters): Promise<ExtractoRes
 
 /**
  * Consulta extracto para un rango de fechas
+ * Ahora con límite de concurrencia para evitar sobrecargar el servidor
  */
 async function fetchExtractoRango(filters: ExtractoFilters): Promise<ExtractoResponse> {
   const { organizacion, imputacion, fechaDesde, fechaHasta } = filters;
@@ -82,31 +83,56 @@ async function fetchExtractoRango(filters: ExtractoFilters): Promise<ExtractoRes
   
   // Generar array de fechas en el rango
   const fechas = generarRangoFechas(fechaDesde, fechaHasta);
-  console.log('Fechas a consultar:', fechas);
+  console.log(`Total de fechas a consultar: ${fechas.length}`);
   
-  // Realizar consultas para cada fecha
-  const promesas = fechas.map(fecha => 
-    fetchExtractoUnico({
-      organizacion,
-      imputacion,
-      fecha,
-      tipoBusqueda: 'unica'
-    }).then(resultado => {
-      // Agregar la fecha consultada al resultado
-      if (resultado) {
-        resultado.fechaConsultada = fecha;
+  // Procesar en lotes para evitar sobrecarga
+  const TAMANO_LOTE = 5; // Consultar 5 fechas a la vez
+  const DELAY_ENTRE_LOTES = 500; // 500ms entre lotes
+  
+  const resultadosValidos: ExtractoResponse[] = [];
+  
+  for (let i = 0; i < fechas.length; i += TAMANO_LOTE) {
+    const loteFechas = fechas.slice(i, i + TAMANO_LOTE);
+    console.log(`Procesando lote ${Math.floor(i / TAMANO_LOTE) + 1}/${Math.ceil(fechas.length / TAMANO_LOTE)}: ${loteFechas.length} fechas`);
+    
+    // Realizar consultas para este lote
+    const promesasLote = loteFechas.map(fecha => 
+      fetchExtractoUnico({
+        organizacion,
+        imputacion,
+        fecha,
+        tipoBusqueda: 'unica'
+      }).then(resultado => {
+        // Agregar la fecha consultada al resultado
+        if (resultado && resultado.numeros && resultado.numeros.length > 0) {
+          resultado.fechaConsultada = fecha;
+          console.log(`✓ Fecha ${fecha}: ${resultado.numeros.length} números encontrados`);
+          return resultado;
+        }
+        console.log(`⊘ Fecha ${fecha}: Sin datos`);
+        return null;
+      }).catch(error => {
+        console.warn(`✗ Fecha ${fecha}: Error ${error.message}`);
+        return null; // Retornar null en caso de error para esa fecha
+      })
+    );
+    
+    const resultadosLote = await Promise.all(promesasLote);
+    
+    // Agregar solo resultados válidos
+    resultadosLote.forEach(resultado => {
+      if (resultado !== null) {
+        resultadosValidos.push(resultado);
       }
-      return resultado;
-    }).catch(error => {
-      console.warn(`Error consultando fecha ${fecha}:`, error);
-      return null; // Retornar null en caso de error para esa fecha
-    })
-  );
+    });
+    
+    // Delay entre lotes (excepto en el último)
+    if (i + TAMANO_LOTE < fechas.length) {
+      await new Promise(resolve => setTimeout(resolve, DELAY_ENTRE_LOTES));
+    }
+  }
   
-  const resultados = await Promise.all(promesas);
-  
-  // Filtrar resultados nulos y combinar datos
-  const resultadosValidos = resultados.filter(resultado => resultado !== null) as ExtractoResponse[];
+  console.log(`✓ Consulta completada: ${resultadosValidos.length} de ${fechas.length} fechas con datos`);
   
   if (resultadosValidos.length === 0) {
     throw new Error('No se encontraron datos para el rango de fechas especificado');

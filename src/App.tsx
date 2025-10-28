@@ -4,7 +4,7 @@ import { organizaciones, imputaciones } from './constants';
 import { formatDateForAPI, exportToCSV } from './utils';
 import { fetchExtracto } from './api';
 import { Estadisticas } from './components/Estadisticas';
-import { AnalisisIA } from './components/AnalisisIA';
+// import { AnalisisIA } from './components/AnalisisIA'; // Temporalmente deshabilitado
 import './App.css';
 
 function App() {
@@ -182,12 +182,13 @@ function App() {
           >
             Estadísticas
           </button>
-          <button 
+          {/* Análisis IA temporalmente deshabilitado */}
+          {/* <button 
             className={`tab-button ${activeTab === 'ia' ? 'active' : ''}`}
             onClick={() => setActiveTab('ia')}
           >
             🤖 Análisis IA
-          </button>
+          </button> */}
         </nav>
       </header>
       
@@ -415,13 +416,15 @@ function App() {
             fechaDesde={formData.fechaDesde}
             fechaHasta={formData.fechaHasta}
           />
-        ) : (
+        ) : null}
+        {/* Análisis IA temporalmente deshabilitado */}
+        {/* : (
           <AnalisisIA
             data={extractoData}
             fechaDesde={formData.fechaDesde}
             fechaHasta={formData.fechaHasta}
           />
-        )}
+        )} */}
       </main>
     </div>
   );
