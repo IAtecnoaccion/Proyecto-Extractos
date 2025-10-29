@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ExtractoResponse } from '../types';
 import './Estadisticas.css';
 
@@ -32,6 +32,22 @@ interface EstadisticaRango {
 }
 
 export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fechaHasta }) => {
+  const [seccionesAbiertas, setSeccionesAbiertas] = useState<{
+    basicas: boolean;
+    rangos: boolean;
+    posiciones: boolean;
+  }>({
+    basicas: true,
+    rangos: false,
+    posiciones: false,
+  });
+
+  const toggleSeccion = (seccion: keyof typeof seccionesAbiertas) => {
+    setSeccionesAbiertas(prev => ({
+      ...prev,
+      [seccion]: !prev[seccion]
+    }));
+  };
   if (!data || !data.numeros || data.numeros.length === 0) {
     return (
       <div className="estadisticas-container">
@@ -300,54 +316,64 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
         </div>
       </div>
 
-      <div className="estadisticas-grid">
-        {/* Números Más Frecuentes Generales */}
-        <div className="estadistica-section">
-          <h3>🔥 Top 10 - Números Más Frecuentes</h3>
-          <div className="tabla-estadisticas">
-            <div className="tabla-header">
-              <span>Número</span>
-              <span>Frecuencia</span>
-              <span>Última fecha</span>
-            </div>
-            {estadisticasGenerales.todosMasFrecuentes.map((stat, index) => {
-              // Obtener la fecha más reciente
-              const fechaMasReciente = stat.fechas.sort((a, b) => 
-                new Date(b.split('/').reverse().join('-')).getTime() - 
-                new Date(a.split('/').reverse().join('-')).getTime()
-              )[0];
-              
-              return (
-                <div key={stat.numero} className="tabla-row">
-                  <span className="numero-destacado">#{index + 1} {stat.numero}</span>
-                  <span className="frecuencia-alta">{stat.frecuencia}</span>
-                  <span className="fecha">{fechaMasReciente || 'N/A'}</span>
-                </div>
-              );
-            })}
-          </div>
+      {/* Acordeón 1: Estadísticas Básicas */}
+      <div className="accordion-section">
+        <div 
+          className="accordion-header"
+          onClick={() => toggleSeccion('basicas')}
+        >
+          <h3>📊 Estadísticas Básicas</h3>
+          <span className="accordion-icon">{seccionesAbiertas.basicas ? '▼' : '▶'}</span>
         </div>
+        
+        {seccionesAbiertas.basicas && (
+          <div className="accordion-content">
+            <div className="estadisticas-grid">
+              {/* Números Más Frecuentes Generales */}
+              <div className="estadistica-section">
+                <h3>🔥 Top 10 - Números Más Frecuentes</h3>
+                <div className="tabla-estadisticas">
+                  <div className="tabla-header">
+                    <span>Número</span>
+                    <span>Frecuencia</span>
+                    <span>Última fecha</span>
+                  </div>
+                  {estadisticasGenerales.todosMasFrecuentes.map((stat, index) => {
+                    const fechaMasReciente = stat.fechas.sort((a, b) => 
+                      new Date(b.split('/').reverse().join('-')).getTime() - 
+                      new Date(a.split('/').reverse().join('-')).getTime()
+                    )[0];
+                    
+                    return (
+                      <div key={stat.numero} className="tabla-row">
+                        <span className="numero-destacado">#{index + 1} {stat.numero}</span>
+                        <span className="frecuencia-alta">{stat.frecuencia}</span>
+                        <span className="fecha">{fechaMasReciente || 'N/A'}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-        {/* Números Menos Frecuentes Generales */}
-        <div className="estadistica-section">
-          <h3>❄️ Top 10 - Números Menos Frecuentes</h3>
-          <div className="tabla-estadisticas">
-            <div className="tabla-header">
-              <span>Número</span>
-              <span>Frecuencia</span>
-              <span>Última fecha</span>
-            </div>
-            {estadisticasGenerales.todosMenosFreuentes.map((stat, index) => {
-              // Obtener la fecha más reciente
-              const fechaMasReciente = stat.fechas.sort((a, b) => 
-                new Date(b.split('/').reverse().join('-')).getTime() - 
-                new Date(a.split('/').reverse().join('-')).getTime()
-              )[0];
-              
-              return (
-                <div key={stat.numero} className="tabla-row">
-                  <span className="numero-raro">#{index + 1} {stat.numero}</span>
-                  <span className="frecuencia-baja">{stat.frecuencia}</span>
+              {/* Números Menos Frecuentes Generales */}
+              <div className="estadistica-section">
+                <h3>❄️ Top 10 - Números Menos Frecuentes</h3>
+                <div className="tabla-estadisticas">
+                  <div className="tabla-header">
+                    <span>Número</span>
+                    <span>Frecuencia</span>
+                    <span>Última fecha</span>
+                  </div>
+                  {estadisticasGenerales.todosMenosFreuentes.map((stat, index) => {
+                    const fechaMasReciente = stat.fechas.sort((a, b) => 
+                      new Date(b.split('/').reverse().join('-')).getTime() - 
+                      new Date(a.split('/').reverse().join('-')).getTime()
+                    )[0];
+                    
+                    return (
+                      <div key={stat.numero} className="tabla-row">
+                        <span className="numero-raro">#{index + 1} {stat.numero}</span>
+                        <span className="frecuencia-baja">{stat.frecuencia}</span>
                   <span className="fecha">{fechaMasReciente || 'N/A'}</span>
                 </div>
               );
@@ -355,10 +381,24 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
           </div>
         </div>
       </div>
+          </div>
+        )}
+      </div>
 
+      {/* Acordeón 2: Análisis por Rangos */}
+      <div className="accordion-section">
+        <div 
+          className="accordion-header"
+          onClick={() => toggleSeccion('rangos')}
+        >
+          <h3>🎯 Análisis por Rangos de Posiciones</h3>
+          <span className="accordion-icon">{seccionesAbiertas.rangos ? '▼' : '▶'}</span>
+        </div>
+        
+        {seccionesAbiertas.rangos && (
+          <div className="accordion-content">
       {/* Análisis por Rangos de Posiciones */}
       <div className="analisis-rangos">
-        <h2>🎯 Análisis por Rangos de Posiciones</h2>
         <div className="rangos-grid">
           {estadisticasRangos.map((rango, index) => (
             <div key={index} className="rango-card">
@@ -424,10 +464,24 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
           ))}
         </div>
       </div>
+          </div>
+        )}
+      </div>
 
+      {/* Acordeón 3: Análisis por Posición */}
+      <div className="accordion-section">
+        <div 
+          className="accordion-header"
+          onClick={() => toggleSeccion('posiciones')}
+        >
+          <h3>📍 Análisis de Pares por Posición</h3>
+          <span className="accordion-icon">{seccionesAbiertas.posiciones ? '▼' : '▶'}</span>
+        </div>
+        
+        {seccionesAbiertas.posiciones && (
+          <div className="accordion-content">
       {/* Análisis por Posición */}
       <div className="analisis-posiciones">
-        <h2>📍 Análisis de Pares por Posición</h2>
         <div className="posiciones-grid">
           {estadisticasPosicion.map((posicion) => (
             <div key={posicion.posicion} className="posicion-card">
@@ -488,6 +542,9 @@ export const Estadisticas: React.FC<EstadisticasProps> = ({ data, fechaDesde, fe
             </div>
           ))}
         </div>
+      </div>
+          </div>
+        )}
       </div>
     </div>
   );

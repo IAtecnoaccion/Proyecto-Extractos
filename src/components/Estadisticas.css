@@ -721,3 +721,245 @@
   font-size: 16px;
   text-align: center;
 }
+
+/* ============================================
+   ACORDEONES
+   ============================================ */
+
+.accordion-section {
+  margin: 20px 0;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.accordion-section:hover {
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+}
+
+.accordion-header {
+  padding: 20px 25px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.accordion-header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.accordion-header h3 {
+  margin: 0;
+  color: #e0e6ff;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.accordion-icon {
+  color: #667eea;
+  font-size: 18px;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.accordion-content {
+  padding: 25px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   TEMPERATURA DE NÚMEROS
+   ============================================ */
+
+.temperatura-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.temperatura-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.temperatura-section.caliente {
+  border-color: rgba(255, 87, 34, 0.4);
+}
+
+.temperatura-section.caliente:hover {
+  border-color: rgba(255, 87, 34, 0.8);
+  box-shadow: 0 4px 20px rgba(255, 87, 34, 0.2);
+}
+
+.temperatura-section.tibio {
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.temperatura-section.tibio:hover {
+  border-color: rgba(255, 193, 7, 0.8);
+  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.2);
+}
+
+.temperatura-section.frio {
+  border-color: rgba(33, 150, 243, 0.4);
+}
+
+.temperatura-section.frio:hover {
+  border-color: rgba(33, 150, 243, 0.8);
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.2);
+}
+
+.temperatura-section.helado {
+  border-color: rgba(156, 39, 176, 0.4);
+}
+
+.temperatura-section.helado:hover {
+  border-color: rgba(156, 39, 176, 0.8);
+  box-shadow: 0 4px 20px rgba(156, 39, 176, 0.2);
+}
+
+.temperatura-section h3 {
+  margin: 0 0 10px 0;
+  color: #e0e6ff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.temperatura-count {
+  color: #a0aec0;
+  font-size: 13px;
+  margin-bottom: 15px;
+  font-weight: 500;
+}
+
+.numeros-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.numeros-lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.numeros-lista::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.numeros-lista::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.5);
+  border-radius: 3px;
+}
+
+.numeros-lista::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.8);
+}
+
+.numero-temp-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 8px;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.numero-temp-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.numero-temp-card.caliente {
+  border-color: rgba(255, 87, 34, 0.3);
+}
+
+.numero-temp-card.caliente:hover {
+  background: rgba(255, 87, 34, 0.15);
+  border-color: rgba(255, 87, 34, 0.6);
+}
+
+.numero-temp-card.tibio {
+  border-color: rgba(255, 193, 7, 0.3);
+}
+
+.numero-temp-card.tibio:hover {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.6);
+}
+
+.numero-temp-card.frio {
+  border-color: rgba(33, 150, 243, 0.3);
+}
+
+.numero-temp-card.frio:hover {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: rgba(33, 150, 243, 0.6);
+}
+
+.numero-temp-card.helado {
+  border-color: rgba(156, 39, 176, 0.3);
+}
+
+.numero-temp-card.helado:hover {
+  background: rgba(156, 39, 176, 0.15);
+  border-color: rgba(156, 39, 176, 0.6);
+}
+
+.numero-grande {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+  font-family: 'Courier New', monospace;
+}
+
+.numero-info {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.numero-info .dias {
+  color: #ff8a65;
+  font-weight: 600;
+}
+
+.numero-info .freq {
+  color: #4fd1c7;
+  font-weight: 600;
+}
+
+.ultima-fecha {
+  display: block;
+  font-size: 10px;
+  color: #a0aec0;
+  font-style: italic;
+}
